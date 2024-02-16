@@ -2,8 +2,24 @@
 
 <JUCERPROJECT id="Mi42cI" name="TubeDistortion" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" displaySplashScreen="1" jucerFormatVersion="1"
-              companyName="Cortex Labs" pluginFormats="buildAU,buildStandalone,buildVST,buildVST3">
+              companyName="Cortex Labs" pluginFormats="buildAU,buildStandalone,buildVST3">
   <MAINGROUP id="f6tyIh" name="TubeDistortion">
+    <GROUP id="{BED33B7B-D99F-577C-AB26-CB3E71BFE372}" name="UITools">
+      <FILE id="N8PFXa" name="AudioOscilloscope.cpp" compile="1" resource="0"
+            file="Source/UITools/AudioOscilloscope.cpp"/>
+      <FILE id="wHomek" name="AudioOscilloscope.h" compile="0" resource="0"
+            file="Source/UITools/AudioOscilloscope.h"/>
+      <FILE id="Sp1cJj" name="DecibelLitBorder.cpp" compile="1" resource="0"
+            file="Source/UITools/DecibelLitBorder.cpp"/>
+      <FILE id="qCuodM" name="DecibelLitBorder.h" compile="0" resource="0"
+            file="Source/UITools/DecibelLitBorder.h"/>
+      <FILE id="UOawM7" name="PresetBrowser.cpp" compile="1" resource="0"
+            file="Source/UITools/PresetBrowser.cpp"/>
+      <FILE id="SUSCMv" name="PresetBrowser.h" compile="0" resource="0" file="Source/UITools/PresetBrowser.h"/>
+      <FILE id="axXyjJ" name="PresetManager.cpp" compile="1" resource="0"
+            file="Source/UITools/PresetManager.cpp"/>
+      <FILE id="qaX3PG" name="PresetManager.h" compile="0" resource="0" file="Source/UITools/PresetManager.h"/>
+    </GROUP>
     <GROUP id="{A605B71C-533B-74C8-F66B-1D92F5F7D0F9}" name="Saturators">
       <FILE id="noy6Ed" name="RamperLinear.h" compile="0" resource="0" file="Source/Saturators/RamperLinear.h"/>
       <FILE id="TT4ldc" name="TubeDistortion.h" compile="0" resource="0"

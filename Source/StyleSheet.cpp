@@ -227,6 +227,7 @@ void CustomLNF::drawPropertyComponentLabel(juce::Graphics& g, int width, int hei
         juce::Justification::centredLeft, 2);
 }
 
+
 int CustomLNF::getPropertyComponentIndent(juce::PropertyComponent& component)
 {
     return juce::jmin(10, component.getWidth() / 10);
@@ -305,7 +306,7 @@ juce::Rectangle<int> CustomSliderWithLabels::getSliderBounds() const
 
     auto size = juce::jmin(bounds.getWidth(), bounds.getHeight());
 
-    size -= getTextHeight() * 2;
+    size -= getTextHeight();
 
     juce::Rectangle<int> r;
     r.setSize(size, size);

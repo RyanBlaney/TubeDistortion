@@ -11,6 +11,9 @@
 #include <JuceHeader.h>
 
 #include "Saturators/TubeDistortion.h"
+#include "UITools/AudioOscilloscope.h"
+#include "UITools/DecibelLitBorder.h"
+#include "UITools/PresetManager.h"
 
 //==============================================================================
 /**
@@ -56,6 +59,7 @@ public:
     void getStateInformation (juce::MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    PresetManager& getPresetManager() { return presetManager; }
 
     //==============================================================================
     // PLUGIN PARAMETERS
@@ -67,11 +71,16 @@ public:
 
     Tube tubeDistortion;
 
+    AudioOscilloscope oscilloscope;
+    DecibelLitBorder oscilloscopeBorder;
+
 private:
     juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
     void parameterChanged(const juce::String& parameterID, float newValue) override;
 
     juce::dsp::ProcessSpec processSpec;
+
+    PresetManager presetManager;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TubeDistortionAudioProcessor)

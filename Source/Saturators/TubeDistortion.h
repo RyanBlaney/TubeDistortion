@@ -87,7 +87,7 @@
 
          // Add harmonics
          sampleOut = saturateOdd(sampleOut, harmonicOrder, oddHarmonicMix);
-         sampleOut += saturateEven(sampleOut, evenHarmonicMix);
+         sampleOut += saturateEven(sampleOut, harmonicOrder, evenHarmonicMix);
 
          // Blend effect with the MIX knob (doesn't effect the output gain)
 	     sampleOut = ((1.f - mix) * input + mix * sampleOut);
@@ -123,16 +123,19 @@
         return mix * out + sample * (1.f - mix);
     }
 
-    float saturateEven(float sample, float mix) {
-        float wet = sample * sample;
-        return wet * mix + sample * (1.0f - mix);
-    }
+    float saturateEven(float sample, float power, float mix) {
+        int order = (int) power;
+        if (order % 2 == 0) order++;
+        float wet = sample;
+        wet = sample + std::abs(std::powf(wet, (float)power));
 
-    float saturateEvenOffset(float sample) {
-        float wet = sample * sample;
-        wet -= 0.5f;
-        wet *= 2.0f;
-        return wet * evenHarmonicMix + sample * (1.0f - evenHarmonicMix);
+        /* Sinsuoid Distortion
+     	//for (int i = 4; i <= order; i *= 4)
+            wet += (1.f - (.06f * (float) order)) * std::cos(std::acos(sample) * order); */
+        
+     	wet -= 0.5f * abs(sample);
+        wet *= 2.0f * abs(sample);
+        return wet * mix + sample * (1.0f - mix);
     }
 
      //====================================================================================================================

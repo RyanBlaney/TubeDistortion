@@ -11,6 +11,7 @@
 #include <JuceHeader.h>
 #include "PluginProcessor.h"
 #include "StyleSheet.h"
+#include "UITools/PresetBrowser.h"
 
 //==============================================================================
 /**
@@ -59,6 +60,8 @@ private:
         evenHarmonicLabel,
 		oddHarmonicValueLabel,
 		evenHarmonicValueLabel;
+
+    PresetPanel presetManager;
 
     juce::AudioProcessorValueTreeState::SliderAttachment
         inputGainAttach,

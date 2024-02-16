@@ -18,7 +18,8 @@ TubeDistortionAudioProcessor::TubeDistortionAudioProcessor()
                        .withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                        ),
-						valueTreeState(*this, nullptr, "Parameters", createParameterLayout())
+						valueTreeState(*this, nullptr, "Parameters", createParameterLayout()),
+							presetManager(valueTreeState)
 #endif
 {
 	valueTreeState.addParameterListener(PARAM_INPUT_GAIN_ID, this);
@@ -176,6 +177,8 @@ void TubeDistortionAudioProcessor::processBlock (juce::AudioBuffer<float>& buffe
 	juce::dsp::ProcessContextReplacing<float> context = juce::dsp::ProcessContextReplacing<float>(audioBlock);
 
 	tubeDistortion.process(context);
+	oscilloscope.processBlock(buffer.getReadPointer(0), buffer.getNumSamples());
+	oscilloscopeBorder.processBlock(buffer.getReadPointer(0), buffer.getNumSamples());
 
 	/*for (int i = getNumInputChannels(); i < getNumOutputChannels(); ++i)
 		buffer.clear(i, 0, buffer.getNumSamples());

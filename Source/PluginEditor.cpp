@@ -34,7 +34,9 @@ TubeDistortionAudioProcessorEditor::TubeDistortionAudioProcessorEditor(TubeDisto
 	bassEQAttach(audioProcessor.valueTreeState, PARAM_EQ_BASS_ID, bassEQKnob),
 	midEQAttach(audioProcessor.valueTreeState, PARAM_EQ_MID_ID, midEQKnob),
 	trebleEQAttach(audioProcessor.valueTreeState, PARAM_EQ_TREBLE_ID, trebleEQKnob),
-	presenceEQAttach(audioProcessor.valueTreeState, PARAM_EQ_PRESENCE_ID, presenceEQKnob)
+	presenceEQAttach(audioProcessor.valueTreeState, PARAM_EQ_PRESENCE_ID, presenceEQKnob),
+
+	presetManager(p.getPresetManager())
 {
 
     // Set Knobs and Sliders
@@ -59,6 +61,10 @@ TubeDistortionAudioProcessorEditor::TubeDistortionAudioProcessorEditor(TubeDisto
     addAndMakeVisible(midEQLabel);
     addAndMakeVisible(trebleEQLabel);
     addAndMakeVisible(presenceEQLabel);
+
+    addAndMakeVisible(audioProcessor.oscilloscope);
+    addAndMakeVisible(audioProcessor.oscilloscopeBorder);
+    addAndMakeVisible(presetManager);
 
     // Param Initialization
 
@@ -113,22 +119,41 @@ TubeDistortionAudioProcessorEditor::TubeDistortionAudioProcessorEditor(TubeDisto
     oddHarmonicSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
     oddHarmonicSlider.setRange(0, 1, 0.025);
     oddHarmonicSlider.setDoubleClickReturnValue(true, 0.6);
-    oddHarmonicLabel.setText("H\na\nr\nm\no\nn\ni\nc", juce::NotificationType::dontSendNotification);
+    oddHarmonicLabel.setText("ODD", juce::NotificationType::dontSendNotification);
     oddHarmonicLabel.setColour(juce::Label::textColourId, THEMES_MAIN_TEXT);
 
     evenHarmonicSlider.setSliderStyle(juce::Slider::SliderStyle::LinearVertical);
     evenHarmonicSlider.setRange(0, 1, 0.025);
     evenHarmonicSlider.setDoubleClickReturnValue(true, 0.2);
-    evenHarmonicLabel.setText( "H"
-							    "\na"
-								"\nr"
-								"\nm"
-								"\no"
-								"\nn"
-								"\ni"
-								"\nc", 
-								juce::NotificationType::dontSendNotification);
+    evenHarmonicLabel.setText( "EVEN", juce::NotificationType::dontSendNotification);
     evenHarmonicLabel.setColour(juce::Label::textColourId, THEMES_MAIN_TEXT);
+
+    audioProcessor.oscilloscope.setBackgroundColour(THEMES_MAIN_VISUALIZER_BG);
+    audioProcessor.oscilloscope.setClippingColour(THEMES_MAIN_PARAM_FILL);
+    audioProcessor.oscilloscope.setMediumLevelColour(THEMES_MAIN_TEXT);
+    audioProcessor.oscilloscope.setNormalColour(THEMES_MAIN_PARAM_OUTLINE);
+    audioProcessor.oscilloscope.setClippingThreshold(.666f);
+    audioProcessor.oscilloscopeBorder.setClippingColour(THEMES_MAIN_PARAM_FILL);
+    audioProcessor.oscilloscopeBorder.setMediumLevelColour(THEMES_MAIN_TEXT);
+    audioProcessor.oscilloscopeBorder.setNormalColour(THEMES_MAIN_PARAM_OUTLINE);
+    audioProcessor.oscilloscopeBorder.setClippingThreshold(.666f);
+
+
+    sliderLNF.setColour(juce::TextButton::ColourIds::textColourOffId, THEMES_MAIN_PARAM_FILL.darker(.2f));
+    sliderLNF.setColour(juce::TextButton::ColourIds::textColourOnId, THEMES_MAIN_PARAM_FILL);
+    sliderLNF.setColour(juce::TextButton::ColourIds::buttonColourId, THEMES_MAIN_BACKGROUND.darker(.2f));
+    sliderLNF.setColour(juce::TextButton::ColourIds::buttonOnColourId, THEMES_MAIN_BACKGROUND.darker(.4f));
+
+    sliderLNF.setColour(juce::ComboBox::ColourIds::textColourId, THEMES_MAIN_PARAM_FILL);
+    sliderLNF.setColour(juce::ComboBox::ColourIds::outlineColourId, THEMES_MAIN_PARAM_FILL);
+    sliderLNF.setColour(juce::ComboBox::ColourIds::backgroundColourId, THEMES_MAIN_BACKGROUND.darker(.4f));
+    sliderLNF.setColour(juce::ComboBox::ColourIds::buttonColourId, THEMES_MAIN_BACKGROUND.darker(.4f));
+    sliderLNF.setColour(juce::ComboBox::ColourIds::arrowColourId, THEMES_MAIN_PARAM_FILL);
+
+    sliderLNF.setColour(juce::PopupMenu::ColourIds::textColourId, THEMES_MAIN_PARAM_FILL);
+    sliderLNF.setColour(juce::PopupMenu::ColourIds::highlightedTextColourId, THEMES_MAIN_PARAM_FILL.darker(.2f));
+    sliderLNF.setColour(juce::PopupMenu::ColourIds::backgroundColourId, THEMES_MAIN_BACKGROUND.darker(.2f));
+    sliderLNF.setColour(juce::PopupMenu::ColourIds::highlightedBackgroundColourId, THEMES_MAIN_BACKGROUND.darker(.4f));
 
     juce::LookAndFeel::setDefaultLookAndFeel(&sliderLNF);
 
@@ -137,7 +162,7 @@ TubeDistortionAudioProcessorEditor::TubeDistortionAudioProcessorEditor(TubeDisto
     setSize(360, 480);
     setResizable(true, true);
     getConstrainer()->setFixedAspectRatio(0.75);
-    setResizeLimits(240, 320, 768, 1024);
+    setResizeLimits(240, 320, 512, 720);
     resizeParams();
 }
 
@@ -165,6 +190,7 @@ void TubeDistortionAudioProcessorEditor::resizeParams()
     const int knobSize = getLocalBounds().getHeight() / 8;
     const int padding = knobSize / 4;
 
+
     inputGainKnob.setBounds(padding, padding * 2 + visualizerBounds.getHeight(), knobSize * 2, knobSize * 2);
     inputGainKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, knobSize, knobSize / 4);
     inputGainLabel.setBounds(inputGainKnob.getX(), inputGainKnob.getY() - (int) (padding * 1.5), inputGainKnob.getWidth(), padding * 2);
@@ -189,39 +215,44 @@ void TubeDistortionAudioProcessorEditor::resizeParams()
     harmonicOrderLabel.setFont(juce::Font(padding));
     harmonicOrderLabel.setJustificationType(juce::Justification::centred);
 
-    oddHarmonicSlider.setBounds(inputGainKnob.getX() - padding, inputGainKnob.getY() + knobSize * 2 - padding, knobSize, knobSize * 2);
+    oddHarmonicSlider.setBounds(inputGainKnob.getX() + padding * 2, inputGainKnob.getY() + knobSize * 2, knobSize, (int)knobSize * 1.8);
     oddHarmonicSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, knobSize / 2, knobSize / 2);
-    oddHarmonicLabel.setBounds(oddHarmonicSlider.getX(), oddHarmonicSlider.getY() - (int)(padding * 1.5), oddHarmonicSlider.getWidth(), padding * 2);
+    oddHarmonicLabel.setBounds(oddHarmonicSlider.getX(), oddHarmonicSlider.getY() - (int) (padding * 1.4), oddHarmonicSlider.getWidth(), padding * 2);
     oddHarmonicLabel.setFont(juce::Font(padding));
     oddHarmonicLabel.setJustificationType(juce::Justification::centred);
 
-    evenHarmonicSlider.setBounds(outputGainKnob.getX() + padding * 2, inputGainKnob.getY() + knobSize * 2 - padding, knobSize, knobSize * 2);
+    evenHarmonicSlider.setBounds(outputGainKnob.getX() + padding * 2, inputGainKnob.getY() + knobSize * 2, knobSize, (int)knobSize * 1.8);
     evenHarmonicSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, knobSize / 2, knobSize / 2);
-    evenHarmonicLabel.setBounds(evenHarmonicSlider.getX() + padding * 2, evenHarmonicSlider.getY(), evenHarmonicSlider.getWidth(), evenHarmonicSlider.getHeight());
+    evenHarmonicLabel.setBounds(evenHarmonicSlider.getX(), evenHarmonicSlider.getY() - (int) (padding * 1.4), evenHarmonicSlider.getWidth(), padding * 2);
     evenHarmonicLabel.setFont(juce::Font(padding));
-    evenHarmonicLabel.setJustificationType(juce::Justification::centredTop);
+    evenHarmonicLabel.setJustificationType(juce::Justification::centred);
 
-    bassEQKnob.setBounds(padding * 2, getLocalBounds().getBottom() - (padding * 2 + knobSize), knobSize, knobSize);
+    bassEQKnob.setBounds(padding * 2, getLocalBounds().getBottom() - (padding * 2 + knobSize), (int)(knobSize * 1.2), (int)(knobSize * 1.2));
     bassEQKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, knobSize / 2, knobSize / 2);
     bassEQLabel.setBounds(bassEQKnob.getX(), bassEQKnob.getY() - (int)(padding * 1.5), bassEQKnob.getWidth(), padding * 2);
     bassEQLabel.setFont(juce::Font(padding));
     bassEQLabel.setJustificationType(juce::Justification::centred);
 
-    midEQKnob.setBounds(bassEQKnob.getX() + knobSize + padding, getLocalBounds().getBottom() - (padding * 2 + knobSize), knobSize, knobSize);
+    midEQKnob.setBounds(bassEQKnob.getX() + knobSize + padding, getLocalBounds().getBottom() - (padding * 2 + knobSize), (int)(knobSize * 1.2), (int)(knobSize * 1.2));
     midEQKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, knobSize / 2, knobSize / 2);
     midEQLabel.setBounds(midEQKnob.getX(), midEQKnob.getY() - (int)(padding * 1.5), midEQKnob.getWidth(), padding * 2);
     midEQLabel.setFont(juce::Font(padding));
     midEQLabel.setJustificationType(juce::Justification::centred);
 
-    trebleEQKnob.setBounds(midEQKnob.getX() + knobSize + padding, getLocalBounds().getBottom() - (padding * 2 + knobSize), knobSize, knobSize);
+    trebleEQKnob.setBounds(midEQKnob.getX() + knobSize + padding, getLocalBounds().getBottom() - (padding * 2 + knobSize), (int)(knobSize * 1.2), (int)(knobSize * 1.2));
     trebleEQKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, knobSize / 2, knobSize / 2);
     trebleEQLabel.setBounds(trebleEQKnob.getX(), trebleEQKnob.getY() - (int)(padding * 1.5), trebleEQKnob.getWidth(), padding * 2);
     trebleEQLabel.setFont(juce::Font(padding));
     trebleEQLabel.setJustificationType(juce::Justification::centred);
 
-    presenceEQKnob.setBounds(trebleEQKnob.getX() + knobSize + padding, getLocalBounds().getBottom() - (padding * 2 + knobSize), knobSize, knobSize);
+    presenceEQKnob.setBounds(trebleEQKnob.getX() + knobSize + padding, getLocalBounds().getBottom() - (padding * 2 + knobSize), (int)(knobSize * 1.2), (int)(knobSize * 1.2));
     presenceEQKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, knobSize / 2, knobSize / 2);
     presenceEQLabel.setBounds(presenceEQKnob.getX(), presenceEQKnob.getY() - (int)(padding * 1.5), presenceEQKnob.getWidth(), padding * 2);
     presenceEQLabel.setFont(juce::Font(padding));
     presenceEQLabel.setJustificationType(juce::Justification::centred);
+
+    audioProcessor.oscilloscope.setBounds(padding, padding, visualizerBounds.getWidth() - padding * 2, visualizerBounds.getHeight() - padding);
+    audioProcessor.oscilloscopeBorder.setBounds(audioProcessor.oscilloscope.getX(), audioProcessor.oscilloscope.getY(), audioProcessor.oscilloscope.getWidth(), audioProcessor.oscilloscope.getHeight());
+
+    presetManager.setBounds(getLocalBounds().removeFromBottom(proportionOfHeight(0.075f)));
 }
