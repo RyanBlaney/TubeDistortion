@@ -127,7 +127,7 @@
         int order = (int) power;
         if (order % 2 == 0) order++;
         float wet = sample;
-        wet = sample + std::abs(std::powf(wet, (float)power));
+        wet = sample + std::abs(powf(wet, (float)power));
 
         /* Sinsuoid Distortion
      	//for (int i = 4; i <= order; i *= 4)

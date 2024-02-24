@@ -18,7 +18,7 @@ public:
     void drawRotarySlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos, float rotaryStartAngle, float rotaryEndAngle, juce::Slider& slider) override;
     void drawLinearSlider(juce::Graphics& g, int x, int y, int width, int height, float sliderPos, float minSliderPos, float maxSliderPos, juce::Slider::SliderStyle style, juce::Slider& slider) override;
     void drawPropertyComponentLabel(juce::Graphics&, int width, int height, juce::PropertyComponent&) override;
-    int CustomLNF::getPropertyComponentIndent(juce::PropertyComponent& component);
+    int getPropertyComponentIndent(juce::PropertyComponent& component);
 };
 
 struct CustomSliderWithLabels : juce::Slider

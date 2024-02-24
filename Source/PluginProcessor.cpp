@@ -9,6 +9,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "PluginGlobals.h"
+#include <memory>
 
 //==============================================================================
 TubeDistortionAudioProcessor::TubeDistortionAudioProcessor()
@@ -19,7 +20,7 @@ TubeDistortionAudioProcessor::TubeDistortionAudioProcessor()
                        .withOutput ("Output", juce::AudioChannelSet::stereo(), true)
                        ),
 						valueTreeState(*this, nullptr, "Parameters", createParameterLayout()),
-							presetManager(valueTreeState)
+                        presetManager(valueTreeState)
 #endif
 {
 	valueTreeState.addParameterListener(PARAM_INPUT_GAIN_ID, this);
@@ -36,6 +37,7 @@ TubeDistortionAudioProcessor::TubeDistortionAudioProcessor()
 
 	valueTreeState.addParameterListener(PARAM_MIX_ID, this);
 
+    // valueTreeState.undoManager = 
 }
 
 TubeDistortionAudioProcessor::~TubeDistortionAudioProcessor()
@@ -216,12 +218,25 @@ void TubeDistortionAudioProcessor::getStateInformation (juce::MemoryBlock& destD
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+    
+    auto state = valueTreeState.copyState();
+    std::unique_ptr<juce::XmlElement> xml (state.createXml());
+    copyXmlToBinary(*xml, destData); 
+    
 }
 
 void TubeDistortionAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+     
+    std::unique_ptr<juce::XmlElement> xmlState (getXmlFromBinary(data, sizeInBytes));
+
+    if (xmlState.get() != nullptr)
+        if (xmlState->hasTagName(valueTreeState.state.getType()))
+            valueTreeState.replaceState(juce::ValueTree::fromXml(*xmlState));
+    
+  
 }
 
 //==============================================================================
@@ -284,7 +299,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout TubeDistortionAudioProcessor
 	layout.add(std::make_unique<juce::AudioParameterChoice>(PARAM_HARMONIC_ORDER_ID, 
 															PARAM_HARMONIC_ORDER_NAME, 
 															harmonicOrderChoice, 
-															0));
+												      1));
 
     layout.add(std::make_unique<juce::AudioParameterFloat>(
 													        PARAM_EQ_BASS_ID,

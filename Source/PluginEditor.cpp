@@ -9,7 +9,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-#include "JuceHeader.h"
+#include <JuceHeader.h>
 #include "PluginGlobals.h"
 
 //==============================================================================
