@@ -9,19 +9,46 @@
 */
 
 #include "PresetManager.h"
+#include "JuceHeader.h"
 
 
 
 PresetManager::PresetManager(juce::AudioProcessorValueTreeState& apvts) :
-	valueTreeState(apvts)
+	valueTreeState(apvts),
+    defaultDirectory(getVst3PresetsPath())
 {
-	if (!defaultDirectory.exists()) {
-		const auto result = defaultDirectory.createDirectory();
+	// Ensure it exists, but DO NOT ASSERT FALSE if it fails permission-wise.
+    if (!defaultDirectory.exists()) {
+        const auto result = defaultDirectory.createDirectory();
+        if (result.failed()) {
+            DBG("Warning: Could not create presets directory '" + defaultDirectory.getFullPathName() 
+                + "': " + result.getErrorMessage());
+             // Optional: Try falling back to userDocumentsDirectory if VST3 path fails?
+        }
+    }
+    
+    currentPreset = ""; 
+}
 
-		if (result.failed()) DBG("Could not create directory: " + result.getErrorMessage());
-		jassertfalse;
-	}
+/*
+  Helper to resolve the correct preset folder based on OS.
+  Prioritizes ~vst3 structure on Linux/Mac/Windows for plugin compatibility.
+*/
+juce::File PresetManager::getVst3PresetsPath() const {
+    juce::String company = ProjectInfo::companyName;
+    juce::String project = ProjectInfo::projectName;
+    
+#ifdef JUCE_LINUX
+    // Use home directory path for Linux VST3 presets (User specific) to avoid permission errors.
+    return juce::File().getSpecialLocation(juce::File::userHomeDirectory).getChildFile(".vst3/presets/" + company + "/" + project);
+        
+#elif defined(JUCE_MAC) || defined(JUCE_WINDOWS)
+    // Use JUCE defaults for others, or stick to App Data
+    return juce::File::getSpecialLocation(juce::File::userApplicationDataDirectory).getChildFile(project + "/Presets");
 
+#else
+    #error "Unknown Platform"
+#endif
 }
 
 void PresetManager::addPreset(const juce::String& presetName)
@@ -31,14 +58,9 @@ void PresetManager::addPreset(const juce::String& presetName)
 	const auto xml = valueTreeState.copyState().createXml();
 	const auto presetFile = defaultDirectory.getChildFile(presetName  + "." + extension);
 
-	/*const auto result = presetFile.create();
-	if (result.failed()) DBG("Could not create file: " + result.getErrorMessage());
-	jassertfalse;*/
-
 	if (!xml->writeTo(presetFile))
 	{
 		DBG("Could not create preset file: " + presetFile.getFullPathName());
-		jassertfalse;
 	}
 
 	currentPreset = presetName;
@@ -52,14 +74,12 @@ void PresetManager::deletePreset(const juce::String& presetName)
 	if (!presetFile.existsAsFile())
 	{
 		DBG("The preset file: " + presetFile.getFullPathName() + " does not exist.");
-		jassertfalse;
 		return;
 	}
 
 	if (!presetFile.deleteFile())
 	{
 		DBG("Could not delete preset file: " + presetFile.getFullPathName());
-		jassertfalse;
 		return;
 	}
 
@@ -74,7 +94,6 @@ void PresetManager::loadPreset(const juce::String& presetName)
 	if (!presetFile.existsAsFile())
 	{
 		DBG("The preset file: " + presetFile.getFullPathName() + " does not exist.");
-		jassertfalse;
 		return;
 	}
 

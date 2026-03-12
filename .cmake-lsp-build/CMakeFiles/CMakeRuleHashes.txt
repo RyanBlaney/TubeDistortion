@@ -1,0 +1,2 @@
+# Hashes of file build rules.
+4f318807f0c27a0a6cf1cd84f97be94c TubeDistortion_artefacts/JuceLibraryCode/JuceHeader.h

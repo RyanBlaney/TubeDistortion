@@ -16,13 +16,9 @@ class PresetManager
 {
 public:
 
-    inline static const juce::File defaultDirectory{
-    juce::File::getSpecialLocation(juce::File::SpecialLocationType::commonDocumentsDirectory)
-        .getChildFile(ProjectInfo::companyName)
-            .getChildFile(ProjectInfo::projectName)
-    };
-
     inline static const juce::String extension = "lab";
+
+    juce::File defaultDirectory;
 
     PresetManager(juce::AudioProcessorValueTreeState &);
 
@@ -39,6 +35,12 @@ public:
     juce::StringArray getAllPresets() const;
 
     juce::String getCurrentPreset() const;
+
+    const juce::File& getPresetsDirectory() const { return defaultDirectory; }
+
+    const juce::String getExtension() const { return extension; }
+
+    juce::File getVst3PresetsPath() const;
 
 private:
 
