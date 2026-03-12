@@ -236,46 +236,46 @@ TubeDistortionAudioProcessor::createParameterLayout() {
   juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
   layout.add(std::make_unique<juce::AudioParameterFloat>(
-      PARAM_INPUT_GAIN_ID, PARAM_INPUT_GAIN_NAME,
+      juce::ParameterID(PARAM_INPUT_GAIN_ID, 1), PARAM_INPUT_GAIN_NAME,
       juce::NormalisableRange<float>(0.1, GAIN_MAX / 2.f, 0.025f,
                                      DRIVE_SKEW_FACTOR, false),
       0.1f));
   layout.add(std::make_unique<juce::AudioParameterFloat>(
-      PARAM_OUTPUT_GAIN_ID, PARAM_OUTPUT_GAIN_NAME,
+      juce::ParameterID(PARAM_OUTPUT_GAIN_ID, 1), PARAM_OUTPUT_GAIN_NAME,
       juce::NormalisableRange<float>(-GAIN_MAX, GAIN_MAX, 0.025f,
                                      GAIN_SKEW_FACTOR, true),
       0.f));
   layout.add(std::make_unique<juce::AudioParameterFloat>(
-      PARAM_ODD_HARMONIC_MIX_ID, PARAM_ODD_HARMONIC_MIX_NAME,
+      juce::ParameterID(PARAM_ODD_HARMONIC_MIX_ID, 1), PARAM_ODD_HARMONIC_MIX_NAME,
       juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f, false), 0.6f));
   layout.add(std::make_unique<juce::AudioParameterFloat>(
-      PARAM_EVEN_HARMONIC_MIX_ID, PARAM_EVEN_HARMONIC_MIX_NAME,
+      juce::ParameterID(PARAM_EVEN_HARMONIC_MIX_ID, 1), PARAM_EVEN_HARMONIC_MIX_NAME,
       juce::NormalisableRange<float>(0.f, 1.f, 0.1f, 1.f, false), 0.2f));
 
   juce::StringArray harmonicOrderChoice = {"1", "2", "3", "4", "5",
                                            "6", "7", "8", "9"};
   layout.add(std::make_unique<juce::AudioParameterChoice>(
-      PARAM_HARMONIC_ORDER_ID, PARAM_HARMONIC_ORDER_NAME, harmonicOrderChoice,
+      juce::ParameterID(PARAM_HARMONIC_ORDER_ID, 1), PARAM_HARMONIC_ORDER_NAME, harmonicOrderChoice,
       1));
 
   layout.add(std::make_unique<juce::AudioParameterFloat>(
-      PARAM_EQ_BASS_ID, PARAM_EQ_BASS_NAME,
+      juce::ParameterID(PARAM_EQ_BASS_ID, 1), PARAM_EQ_BASS_NAME,
       juce::NormalisableRange<float>(-GAIN_MAX, GAIN_MAX, 0.1f, 1.f, false),
       0.f));
   layout.add(std::make_unique<juce::AudioParameterFloat>(
-      PARAM_EQ_MID_ID, PARAM_EQ_MID_NAME,
+      juce::ParameterID(PARAM_EQ_MID_ID, 1), PARAM_EQ_MID_NAME,
       juce::NormalisableRange<float>(-GAIN_MAX, GAIN_MAX, 0.1f, 1.f, false),
       0.f));
   layout.add(std::make_unique<juce::AudioParameterFloat>(
-      PARAM_EQ_TREBLE_ID, PARAM_EQ_TREBLE_NAME,
+      juce::ParameterID(PARAM_EQ_TREBLE_ID, 1), PARAM_EQ_TREBLE_NAME,
       juce::NormalisableRange<float>(-GAIN_MAX, GAIN_MAX, 0.1f, 1.f, false),
       0.f));
   layout.add(std::make_unique<juce::AudioParameterFloat>(
-      PARAM_EQ_PRESENCE_ID, PARAM_EQ_PRESENCE_NAME,
+      juce::ParameterID(PARAM_EQ_PRESENCE_ID, 1), PARAM_EQ_PRESENCE_NAME,
       juce::NormalisableRange<float>(-GAIN_MAX, GAIN_MAX, 0.1f, 1.f, false),
       0.f));
   layout.add(std::make_unique<juce::AudioParameterFloat>(
-      PARAM_MIX_ID, PARAM_MIX_NAME,
+      juce::ParameterID(PARAM_MIX_ID, 1), PARAM_MIX_NAME,
       juce::NormalisableRange<float>(0.f, 1.f, 0.05f, 1.f, false), 1.f));
 
   return layout;

@@ -2,6 +2,8 @@
 
 A basic .vst3 plugin that's create for mixing guitars and vocals. 
 
+![Display](./Media/2026-03-10T14:16:58,999364621-07:00.png)
+
 ## Usage
 
 The tube distortion emulation comes mainly from controlling the odd and even harmonics, 

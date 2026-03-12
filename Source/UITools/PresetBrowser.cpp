@@ -66,8 +66,8 @@ void PresetPanel::buttonClicked(juce::Button* button)
 	{
         fileChooser = std::make_unique<juce::FileChooser>(
 								            "Enter the name of the preset to save.",
-								            PresetManager::defaultDirectory,
-								            "*." + PresetManager::extension,
+								            presetManager.getPresetsDirectory(),
+								            "*." + presetManager.getExtension(),
 								            true);
         fileChooser->launchAsync(juce::FileBrowserComponent::saveMode, [&](const juce::FileChooser& chooser)
 	        {
